@@ -1,0 +1,68 @@
+system:
+  model_name: MNISTModel
+  run_name: demo_run
+
+
+
+model:
+  sync_bn: True
+  hidden_dim: 128
+
+trainer:
+
+  max_epochs: 300
+  output_dir: "exps"
+  desc: "it's a demo."
+  seed: 1234
+  gpus: [0]
+  log_gpu_memory: 'all'
+  val_check_interval: 1.0
+  check_val_every_n_epoch: 1
+  num_nodes: 1
+  log_every_n_steps: 5
+  precision: 32
+  flush_logs_every_n_steps: 100
+  benchmark: True
+  deterministic: False
+  accelerator: "ddp"
+
+  loggers:
+     tensorboard: True
+     wandb: False
+
+  optim:
+    name: Adam
+    args:
+      lr: 0.001
+
+  lr_scheduler:
+    name: ''
+    args: ''
+
+  checkpoints:
+    period: 1
+
+data:
+  train:
+    batch_size: 128
+    num_workers: 2
+    pin_memory: False
+    datasets:
+      - "xxx"
+
+  val:
+    batch_size: 128
+    num_workers: 2
+    pin_memory: False
+    datasets:
+      val1: "xxx"
+      val2: "xxx"
+
+
+  test:
+    batch_size: 128
+    num_workers: 4
+    pin_memory: False
+    datasets:
+      test1: "xxx"
+      test1: "xxx"
