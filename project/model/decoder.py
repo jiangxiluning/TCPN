@@ -21,6 +21,9 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from data_util import config
 from numpy import random
+from easydict import EasyDict
+
+from ..data_module import vocabs
 
 use_cuda = config.use_gpu and torch.cuda.is_available()
 
@@ -108,7 +111,6 @@ class Attention(nn.Module):
         self.v = nn.Linear(config.hidden_dim * 2, 1, bias=False)
 
     def forward(self, s_t_hat, encoder_outputs, encoder_feature, enc_padding_mask, coverage):
-        import ipdb;ipdb.set_trace()
         b, t_k, n = list(encoder_outputs.size())
 
         dec_fea = self.decode_proj(s_t_hat) # B x 2*hidden_dim
@@ -142,30 +144,34 @@ class Attention(nn.Module):
         return c_t, attn_dist, coverage
 
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, config: EasyDict):
         super(Decoder, self).__init__()
+
+        self.embedding_dim = config.model.embedding_dim
+        self.hidden_dim = config.model.hidden_dim
+        self.pointer_gen = config.model.pointer_gen
+
         self.attention_network = Attention()
         # decoder
-        self.embedding = nn.Embedding(config.vocab_size, config.emb_dim)
+        self.embedding = nn.Embedding(len(vocabs.key), self.embedding_dim)
         init_wt_normal(self.embedding.weight)
 
-        self.x_context = nn.Linear(config.hidden_dim * 2 + config.emb_dim, config.emb_dim)
+        self.x_context = nn.Linear(self.hidden_dim * 2 + self.embedding_dim, self.embedding_dim)
 
-        self.lstm = nn.LSTM(config.emb_dim, config.hidden_dim, num_layers=1, batch_first=True, bidirectional=False)
+        self.lstm = nn.LSTM(self.embedding_dim, self.embedding_dim, num_layers=1, batch_first=True, bidirectional=False)
         init_lstm_wt(self.lstm)
 
-        if config.pointer_gen:
-            self.p_gen_linear = nn.Linear(config.hidden_dim * 4 + config.emb_dim, 1)
+        if self.pointer_gen:
+            self.p_gen_linear = nn.Linear(self.hidden_dim * 4 + self.embedding_dim, 1)
 
         #p_vocab
-        self.out1 = nn.Linear(config.hidden_dim * 3, config.hidden_dim)
-        self.out2 = nn.Linear(config.hidden_dim, config.vocab_size)
+        self.out1 = nn.Linear(self.hidden_dim * 3, self.hidden_dim)
+        self.out2 = nn.Linear(self.hidden_dim, len(vocabs.key))
         init_linear_wt(self.out2)
 
     def forward(self, y_t_1, s_t_1, encoder_outputs, encoder_feature, enc_padding_mask,
                 c_t_1, extra_zeros, enc_batch_extend_vocab, coverage, step):
 
-        import ipdb;ipdb.set_trace()
         if not self.training and step == 0:
             h_decoder, c_decoder = s_t_1
             s_t_hat = torch.cat((h_decoder.view(-1, config.hidden_dim),
@@ -188,7 +194,7 @@ class Decoder(nn.Module):
             coverage = coverage_next
 
         p_gen = None
-        if config.pointer_gen:
+        if self.pointer_gen:
             p_gen_input = torch.cat((c_t, s_t_hat, x), 1)  # B x (2*2*hidden_dim + emb_dim)
             p_gen = self.p_gen_linear(p_gen_input)
             p_gen = F.sigmoid(p_gen)
@@ -201,7 +207,7 @@ class Decoder(nn.Module):
         output = self.out2(output) # B x vocab_size
         vocab_dist = F.softmax(output, dim=1)
 
-        if config.pointer_gen:
+        if self.pointer_gen:
             vocab_dist_ = p_gen * vocab_dist
             attn_dist_ = (1 - p_gen) * attn_dist
 

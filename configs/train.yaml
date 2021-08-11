@@ -8,7 +8,10 @@ model:
   sync_bn: True
   hidden_dim: 256
   lattice_dim: 128
+  embedding_dim: 128
+  class_embedding_dim: 128
   max_len: 100
+  pointer_gen: True
 
 
 trainer:
