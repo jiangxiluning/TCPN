@@ -32,12 +32,20 @@ class TCPN(pl.LightningModule):
         sequences, lengths = self.feature_encoder(lattice, b_t)
 
 
+        cp_output = None
+        tag_output = None
+        if self.training:
+            pass
+        else:
 
+            if self.mode == 0:  # CP Mode
+                pass
+            elif self.mode == 1:  # tag mode
+                pass
+            else:
+                raise NotImplementedError('Mode {} is not supported.'.format(self.mode))
 
-        x = x.view(x.size(0), -1)
-        x = torch.relu(self.l1(x))
-        x = torch.relu(self.l2(x))
-        return x
+        return dict(cp_output=cp_output, tag_output=tag_output)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
