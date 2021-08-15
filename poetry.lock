@@ -189,6 +189,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "einops"
+version = "0.3.0"
+description = "A new flavour of deep learning operations"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "fastai"
 version = "2.5.0"
 description = "fastai simplifies training fast and accurate neural nets using modern best practices"
@@ -1209,7 +1217,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "743b5572e8e689ff905c1aa3d37839db476143948520022b7fc5fc0f28000768"
+content-hash = "a64d82e81fce53b6e1d5c51805e68b9676a437af539f18ec054688168d487f41"
 
 [metadata.files]
 absl-py = [
@@ -1343,6 +1351,10 @@ decorator = [
 ]
 easydict = [
     {file = "easydict-1.9.tar.gz", hash = "sha256:3f3f0dab07c299f0f4df032db1f388d985bb57fa4c5be30acd25c5f9a516883b"},
+]
+einops = [
+    {file = "einops-0.3.0-py2.py3-none-any.whl", hash = "sha256:a91c6190ceff7d513d74ca9fd701dfa6a1ffcdd98ea0ced14350197c07f75c73"},
+    {file = "einops-0.3.0.tar.gz", hash = "sha256:a3b0935a4556f012cd5fa1851373f63366890a3f6698d117afea55fd2a40c1fc"},
 ]
 fastai = [
     {file = "fastai-2.5.0-py3-none-any.whl", hash = "sha256:f7941fa4dbf1305c52451d234b6990668b3a385ffaf3b8d7c77ca2079759b5d2"},
